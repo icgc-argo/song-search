@@ -1,6 +1,5 @@
 def dockerRepo = "ghcr.io/icgc-argo/song-search"
 def gitHubRepo = "icgc-argo/song-search"
-def chartVersion = "1.2.0"
 def commit = "UNKNOWN"
 def version = "UNKNOWN"
 
@@ -86,11 +85,9 @@ spec:
             }
             steps {
                 build(job: "/provision/helm", parameters: [
-                     [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'dev' ],
-                     [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'song-search'],
-                     [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'song-search'],
-                     [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
-                     [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${commit}" ]
+                    [$class: 'StringParameterValue', name: 'RDPC_ENV', value: 'dev' ],
+                    [$class: 'StringParameterValue', name: 'TARGET_RELEASE', value: 'song-search'],
+                    [$class: 'StringParameterValue', name: 'NEW_APP_VERSION', value: "${commit}" ]
                 ])
                 // sleep(time:30,unit:"SECONDS")
                 // build(job: "/provision/rdpc-gateway-restart", parameters: [
@@ -126,12 +123,10 @@ spec:
                 branch "master"
             }
             steps {
-                build(job: "/provision/helm", parameters: [
-                     [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'qa' ],
-                     [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'song-search'],
-                     [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'song-search'],
-                     [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
-                     [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}" ]
+                build(job: "/provision/update-app-version", parameters: [
+                    [$class: 'StringParameterValue', name: 'RDPC_ENV', value: 'qa' ],
+                    [$class: 'StringParameterValue', name: 'TARGET_RELEASE', value: 'song-search'],
+                    [$class: 'StringParameterValue', name: 'NEW_APP_VERSION', value: "${version}" ]
                 ])
                 // sleep(time:30,unit:"SECONDS")
                 // build(job: "/provision/rdpc-gateway-restart", parameters: [
