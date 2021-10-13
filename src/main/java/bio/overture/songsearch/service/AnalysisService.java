@@ -137,6 +137,7 @@ public class AnalysisService {
     }
 
     filter.put(ANALYSIS_TYPE, analysisFromId.getAnalysisType());
+    filter.put(ANALYSIS_STATE, "PUBLISHED");
     filter.put("experiment.experimental_strategy", experimentalStrategy);
 
     return getAnalyses(filter.build(), null).stream()
