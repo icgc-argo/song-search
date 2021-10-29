@@ -21,6 +21,7 @@ package bio.overture.songsearch.service;
 import static bio.overture.songsearch.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
 import static bio.overture.songsearch.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static bio.overture.songsearch.config.constants.SearchFields.*;
+import static bio.overture.songsearch.model.enums.AnalysisState.PUBLISHED;
 import static bio.overture.songsearch.model.enums.SpecimenType.NORMAL;
 import static bio.overture.songsearch.model.enums.SpecimenType.TUMOUR;
 import static java.util.Collections.emptyList;
@@ -111,6 +112,10 @@ public class AnalysisService {
 
   public List<SampleMatchedAnalysisPair> getSampleMatchedAnalysisPairs(String analysisId) {
     val analysisFromId = getAnalysisById(analysisId);
+    if (analysisFromId == null || !analysisFromId.getAnalysisState().equals(PUBLISHED)) {
+      return emptyList();
+    }
+
     val flattenedSamples = getFlattenedSamplesFromAnalysis(analysisFromId);
     val experimentalStrategy = analysisFromId.getExperiment().get("experimental_strategy");
 
@@ -137,7 +142,7 @@ public class AnalysisService {
     }
 
     filter.put(ANALYSIS_TYPE, analysisFromId.getAnalysisType());
-    filter.put(ANALYSIS_STATE, "PUBLISHED");
+    filter.put(ANALYSIS_STATE, PUBLISHED.toString());
     filter.put("experiment.experimental_strategy", experimentalStrategy);
 
     return getAnalyses(filter.build(), null).stream()

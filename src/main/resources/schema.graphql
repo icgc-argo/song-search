@@ -207,5 +207,11 @@ extend type Query {
     aggregateAnalyses(filter: AnalysisFilter): AggregationResult!
     files(filter: FileFilter, page: Page, sorts: [FileSort!]): FilesSearchResult!
     aggregateFiles(filter: FileFilter): AggregationResult!
+    """
+    Given an analysisId, match it to its tumour-normal counter part with same experimental strategy.
+    If analysis is tumour matches matchedNormalSubmitterSampleId to analyses with same submitterSampleId.
+    If analysis is normal matches submitterSampleId and matchedNormalSubmitterSampleId.
+    Non PUBLISHED analyses are ignored.
+    """
     sampleMatchedAnalysisPairs(analysisId: String!): [SampleMatchedAnalysisPair]
 }
