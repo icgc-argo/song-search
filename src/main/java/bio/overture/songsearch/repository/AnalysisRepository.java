@@ -195,7 +195,7 @@ public class AnalysisRepository {
   @SneakyThrows
   private MultiSearchResponse execute(@NonNull List<SearchSourceBuilder> builders) {
     MultiSearchRequest mSearchRequest = new MultiSearchRequest();
-    builders.forEach(b -> mSearchRequest.add(new SearchRequest().source(b)));
+    builders.forEach(b -> mSearchRequest.add(new SearchRequest(analysisCentricIndex).source(b)));
     return client.msearch(mSearchRequest, RequestOptions.DEFAULT);
   }
 }
