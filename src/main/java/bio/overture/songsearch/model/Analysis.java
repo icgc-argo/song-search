@@ -77,5 +77,6 @@ public class Analysis {
     private String md5Sum;
     private String fileAccess;
     private String dataType;
+    private Map<String, Object> metrics;
   }
 }
