@@ -53,6 +53,8 @@ public class File {
 
   private List<Donor> donors;
 
+  private Map<String, Object> metrics;
+
   @SneakyThrows
   public static File parse(@NonNull Map<String, Object> sourceMap) {
     return MAPPER.convertValue(sourceMap, File.class);
