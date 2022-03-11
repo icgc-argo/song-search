@@ -19,7 +19,8 @@
 package bio.overture.songsearch.repository;
 
 import static bio.overture.songsearch.config.constants.SearchFields.*;
-import static bio.overture.songsearch.utils.ElasticsearchQueryUtils.*;
+import static bio.overture.songsearch.utils.ElasticsearchQueryUtils.queryFromArgs;
+import static bio.overture.songsearch.utils.ElasticsearchQueryUtils.sortsToEsSortBuilders;
 import static java.util.Collections.emptyList;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.search.sort.SortOrder.ASC;
@@ -27,7 +28,8 @@ import static org.elasticsearch.search.sort.SortOrder.ASC;
 import bio.overture.songsearch.config.ElasticsearchProperties;
 import bio.overture.songsearch.model.Sort;
 import com.google.common.collect.ImmutableMap;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -53,7 +55,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class AnalysisRepository {
-  private static final Map<String, Function<String, AbstractQueryBuilder<?>>> QUERY_RESOLVER =
+  private static final Map<String, Function<Object, AbstractQueryBuilder<?>>> QUERY_RESOLVER =
       argumentPathMap();
 
   private static final Map<String, FieldSortBuilder> SORT_BUILDER_RESOLVER = sortPathMap();
@@ -69,8 +71,8 @@ public class AnalysisRepository {
     this.analysisCentricIndex = elasticSearchProperties.getAnalysisCentricIndex();
   }
 
-  private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
-    return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
+  private static Map<String, Function<Object, AbstractQueryBuilder<?>>> argumentPathMap() {
+    return ImmutableMap.<String, Function<Object, AbstractQueryBuilder<?>>>builder()
         .put(ANALYSIS_ID, value -> new TermQueryBuilder("analysis_id", value))
         .put(ANALYSIS_TYPE, value -> new TermQueryBuilder("analysis_type", value))
         .put(ANALYSIS_VERSION, value -> new TermQueryBuilder("analysis_version", value))

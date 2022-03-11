@@ -42,6 +42,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -51,7 +52,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class FileRepository {
-  private static final Map<String, Function<String, AbstractQueryBuilder<?>>> QUERY_RESOLVER =
+  private static final Map<String, Function<Object, AbstractQueryBuilder<?>>> QUERY_RESOLVER =
       argumentPathMap();
 
   private static final Map<String, FieldSortBuilder> SORT_BUILDER_RESOLVER = sortPathMap();
@@ -67,8 +68,8 @@ public class FileRepository {
     this.fileCentricIndex = elasticSearchProperties.getFileCentricIndex();
   }
 
-  private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
-    return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
+  private static Map<String, Function<Object, AbstractQueryBuilder<?>>> argumentPathMap() {
+    return ImmutableMap.<String, Function<Object, AbstractQueryBuilder<?>>>builder()
         .put(FILE_OBJECT_ID, value -> new TermQueryBuilder("object_id", value))
         .put(FILE_NAME, value -> new TermQueryBuilder("file.name", value))
         .put(FILE_ACCESS, value -> new TermQueryBuilder("file_access", value))
@@ -80,6 +81,15 @@ public class FileRepository {
             value ->
                 new NestedQueryBuilder(
                     "donors", new TermQueryBuilder("donors.donor_id", value), ScoreMode.None))
+        .put(
+            ANALYSIS_TOOLS,
+            value -> {
+              if (value instanceof List) {
+                // TermsQueryBuilder breaks with List, so convert to array
+                return new TermsQueryBuilder("analysis_tools", ((List<?>) value).toArray());
+              }
+              return new TermsQueryBuilder("analysis_tools", value);
+            })
         .build();
   }
 
@@ -120,7 +130,8 @@ public class FileRepository {
     }
 
     // es 7.0+ by default caps total hits up to 10,000 if not explicitly told to track all hits
-    // more info: https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
+    // more info:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
     searchSourceBuilder.trackTotalHits(true);
 
     return execute(searchSourceBuilder);
