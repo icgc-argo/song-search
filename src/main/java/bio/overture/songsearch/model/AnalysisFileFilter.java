@@ -12,7 +12,7 @@ public class AnalysisFileFilter {
   private String fileAccess;
   private String dataType;
 
-  public boolean shouldPass(AnalysisFile file) {
+  public boolean test(AnalysisFile file) {
     if (fileAccess != null
         && file.getFileAccess() != null
         && !file.getFileAccess().equalsIgnoreCase(fileAccess)) {

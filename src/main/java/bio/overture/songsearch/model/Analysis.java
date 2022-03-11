@@ -70,7 +70,7 @@ public class Analysis {
     }
     val fileFilter =
         MAPPER.convertValue(env.getArguments().get("filter"), AnalysisFileFilter.class);
-    return files.stream().filter(fileFilter::shouldPass).collect(Collectors.toList());
+    return files.stream().filter(fileFilter::test).collect(Collectors.toList());
   }
 
   @SneakyThrows
