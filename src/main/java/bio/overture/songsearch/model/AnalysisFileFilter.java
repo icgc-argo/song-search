@@ -1,5 +1,8 @@
 package bio.overture.songsearch.model;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import lombok.Data;
@@ -13,24 +16,19 @@ public class AnalysisFileFilter {
   private String dataType;
 
   public boolean test(AnalysisFile file) {
-    if (fileAccess != null
-        && file.getFileAccess() != null
-        && !file.getFileAccess().equalsIgnoreCase(fileAccess)) {
+    if (fileAccess != null && fileAccess.equalsIgnoreCase(file.getFileAccess())) {
       return false;
     }
-    if (fileType != null
-        && file.getFileType() != null
-        && !file.getFileType().equalsIgnoreCase(fileType)) {
+    if (fileType != null && !fileType.equalsIgnoreCase(file.getFileType())) {
       return false;
     }
-    if (dataType != null
-        && file.getDataType() != null
-        && !file.getDataType().equalsIgnoreCase(dataType)) {
+    if (dataType != null && !dataType.equalsIgnoreCase(file.getDataType())) {
       return false;
     }
     if (analysisTools != null
-        && file.getAnalysisTools() != null
-        && !file.getAnalysisTools().containsAll(analysisTools)) {
+        && !ofNullable(file.getAnalysisTools())
+            .orElse(emptyList())
+            .containsAll(analysisTools)) {
       return false;
     }
     return true;
