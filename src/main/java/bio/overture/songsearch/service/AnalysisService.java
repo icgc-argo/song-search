@@ -21,19 +21,21 @@ package bio.overture.songsearch.service;
 import static bio.overture.songsearch.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
 import static bio.overture.songsearch.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static bio.overture.songsearch.config.constants.SearchFields.*;
+import static bio.overture.songsearch.model.Specimen.NORMAL_DESIGNATION;
 import static bio.overture.songsearch.model.enums.AnalysisState.PUBLISHED;
 import static bio.overture.songsearch.model.enums.SpecimenType.NORMAL;
 import static bio.overture.songsearch.model.enums.SpecimenType.TUMOUR;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toUnmodifiableList;
+import static java.util.stream.Stream.empty;
 
 import bio.overture.songsearch.model.*;
 import bio.overture.songsearch.repository.AnalysisRepository;
 import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
+
+import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -86,6 +88,12 @@ public class AnalysisService {
     return hitStream.map(AnalysisService::hitToAnalysis).collect(toUnmodifiableList());
   }
 
+  public List<Analysis> getAnalyses(Map<String, Object> filter) {
+    val response = analysisRepository.getAnalyses(filter, null);
+    val hitStream = Arrays.stream(response.getHits().getHits());
+    return hitStream.map(AnalysisService::hitToAnalysis).collect(toUnmodifiableList());
+  }
+
   public Analysis getAnalysisById(String analysisId) {
     val response = analysisRepository.getAnalyses(Map.of(ANALYSIS_ID, analysisId), null);
     val runOpt =
@@ -113,18 +121,37 @@ public class AnalysisService {
         .collect(toUnmodifiableList());
   }
 
+  @SneakyThrows
+  public List<SampleMatchedAnalysisPair> getNew(@NonNull String donorId, @NonNull String analysisType) {
+    val filter = new HashMap<String, Object>();
+    filter.put(DONOR_ID, donorId);
+    filter.put(ANALYSIS_STATE, PUBLISHED);
+    filter.put(
+        TUMOUR_NORMAL_DESIGNATION,
+        NORMAL_DESIGNATION); // fetch normal for donor only, otherwise chaos
+    filter.put(ANALYSIS_TYPE, analysisType);
+
+    val donorNormalAnalyses = getAnalyses(filter);
+    return donorNormalAnalyses.stream()
+        .flatMap(this::getSampleMatchedAnalysisPairs)
+        .collect(toUnmodifiableList());
+  }
+
   public List<SampleMatchedAnalysisPair> getSampleMatchedAnalysisPairs(String analysisId) {
-    val analysisFromId = getAnalysisById(analysisId);
-    if (analysisFromId == null || !analysisFromId.getAnalysisState().equals(PUBLISHED)) {
-      return emptyList();
+    return getSampleMatchedAnalysisPairs(getAnalysisById(analysisId)).collect(toUnmodifiableList());
+  }
+
+  private Stream<SampleMatchedAnalysisPair> getSampleMatchedAnalysisPairs(Analysis analysis) {
+    if (analysis == null || !analysis.getAnalysisState().equals(PUBLISHED)) {
+      return empty();
     }
 
-    val flattenedSamples = getFlattenedSamplesFromAnalysis(analysisFromId);
-    val experimentalStrategy = analysisFromId.getExperiment().get("experimental_strategy");
+    val flattenedSamples = getFlattenedSamplesFromAnalysis(analysis);
+    val experimentalStrategy = analysis.getExperiment().get("experimental_strategy");
 
     // short circuit return if can't find sample matched pairs for analysisFromId
     if (experimentalStrategy == null || flattenedSamples.size() != 1) {
-      return emptyList();
+      return empty();
     }
 
     val flattenedSampleOfInterest = flattenedSamples.get(0);
@@ -144,7 +171,7 @@ public class AnalysisService {
           MATCHED_NORMAL_SUBMITTER_SAMPLE_ID, flattenedSampleOfInterest.getSubmitterSampleId());
     }
 
-    filter.put(ANALYSIS_TYPE, analysisFromId.getAnalysisType());
+    filter.put(ANALYSIS_TYPE, analysis.getAnalysisType());
     filter.put(ANALYSIS_STATE, PUBLISHED.toString());
     filter.put("experiment.experimental_strategy", experimentalStrategy);
 
@@ -152,9 +179,8 @@ public class AnalysisService {
         .map(
             a ->
                 tumourNormalDesignation.equalsIgnoreCase(TUMOUR.toString())
-                    ? new SampleMatchedAnalysisPair(a, analysisFromId)
-                    : new SampleMatchedAnalysisPair(analysisFromId, a))
-        .collect(toUnmodifiableList());
+                    ? new SampleMatchedAnalysisPair(a, analysis)
+                    : new SampleMatchedAnalysisPair(analysis, a));
   }
 
   private List<FlatDonorSample> getFlattenedSamplesFromAnalysis(Analysis analysis) {

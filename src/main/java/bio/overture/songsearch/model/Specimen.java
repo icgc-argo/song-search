@@ -32,6 +32,9 @@ import lombok.SneakyThrows;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Specimen {
+  public static final String NORMAL_DESIGNATION = "Normal";
+  public static final String TUMOUR_DESIGNATION = "Tumour";
+
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private String specimenId;

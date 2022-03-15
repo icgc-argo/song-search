@@ -226,4 +226,5 @@ extend type Query {
     Non PUBLISHED analyses are ignored.
     """
     sampleMatchedAnalysisPairs(analysisId: String!): [SampleMatchedAnalysisPair]
+    sampleMatchedAnalysisPairsByDonorId(donorId: String!, analysisType: String!): [SampleMatchedAnalysisPair]
 }
