@@ -23,11 +23,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.val;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -61,22 +64,17 @@ public class Analysis {
 
   private String firstPublishedAt;
 
+  public List<AnalysisFile> getFiles(DataFetchingEnvironment env) {
+    if (env.getArguments().get("filter") == null) {
+      return files;
+    }
+    val fileFilter =
+        MAPPER.convertValue(env.getArguments().get("filter"), AnalysisFileFilter.class);
+    return files.stream().filter(fileFilter::test).collect(Collectors.toList());
+  }
+
   @SneakyThrows
   public static Analysis parse(@NonNull Map<String, Object> sourceMap) {
     return MAPPER.convertValue(sourceMap, Analysis.class);
-  }
-
-  @Data
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-  public static final class AnalysisFile {
-    private String objectId;
-    private String name;
-    private Long size;
-    private String fileType;
-    private String md5Sum;
-    private String fileAccess;
-    private String dataType;
-    private Map<String, Object> metrics;
   }
 }

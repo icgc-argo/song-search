@@ -17,7 +17,7 @@ type Analysis @key(fields: "analysisId") {
     firstPublishedAt: String
     studyId: String
     donors: [Donor]
-    files: [AnalysisFile]
+    files(filter: AnalysisFileFilter): [AnalysisFile] @fetch(from: "files")
     repositories: [Repository]
     experiment: JSON
     workflow: Workflow
@@ -39,6 +39,7 @@ type AnalysisFile {
     fileAccess: String
     dataType: String
     metrics: JSON
+    analysisTools: [String]
 }
 
 type Specimen {
@@ -77,6 +78,7 @@ type File @key(fields: "objectId") {
     repositories: [Repository]
     donors: [Donor]
     metrics: JSON
+    analysisTools: [String]
 }
 
 type FileAnalysis {
@@ -125,6 +127,13 @@ input AnalysisFilter {
     runId: String
 }
 
+input AnalysisFileFilter {
+    fileType: String
+    fileAccess: String
+    dataType: String
+    analysisTools: [String]
+}
+
 input FileFilter {
     objectId: String
     name: String
@@ -133,6 +142,7 @@ input FileFilter {
     analysisId: String
     studyId: String
     donorId: String
+    analysisTools: [String]
 }
 
 input Page {

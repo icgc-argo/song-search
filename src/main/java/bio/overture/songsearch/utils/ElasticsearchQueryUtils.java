@@ -25,7 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.val;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.AbstractQueryBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
@@ -38,7 +41,7 @@ public class ElasticsearchQueryUtils {
    * @return Elasticsearch Bool Query containing ANDed (MUSTed) term queries
    */
   public static BoolQueryBuilder queryFromArgs(
-      Map<String, Function<String, AbstractQueryBuilder<?>>> QUERY_RESOLVER,
+      Map<String, Function<Object, AbstractQueryBuilder<?>>> QUERY_RESOLVER,
       Map<String, Object> args) {
     val bool = QueryBuilders.boolQuery();
     args.forEach(
@@ -46,7 +49,7 @@ public class ElasticsearchQueryUtils {
             bool.must(
                 QUERY_RESOLVER
                     .getOrDefault(key, simpleTermQueryBuilderResolver(key))
-                    .apply(value.toString())));
+                    .apply(value)));
     return bool;
   }
 
@@ -68,7 +71,7 @@ public class ElasticsearchQueryUtils {
         .collect(toUnmodifiableList());
   }
 
-  private static Function<String, AbstractQueryBuilder<?>> simpleTermQueryBuilderResolver(
+  private static Function<Object, AbstractQueryBuilder<?>> simpleTermQueryBuilderResolver(
       String key) {
     return v -> new TermQueryBuilder(key, v);
   }
