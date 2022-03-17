@@ -81,15 +81,13 @@ public class AnalysisService {
   }
 
   public List<Analysis> getAnalyses(Map<String, Object> filter, Map<String, Integer> page) {
-    val response = analysisRepository.getAnalyses(filter, page);
-    val hitStream = Arrays.stream(response.getHits().getHits());
-    return hitStream.map(AnalysisService::hitToAnalysis).collect(toUnmodifiableList());
+    return getAnalysesStream(filter, page).collect(toUnmodifiableList());
   }
 
-  public List<Analysis> getAnalyses(Map<String, Object> filter) {
-    val response = analysisRepository.getAnalyses(filter, null);
+  public Stream<Analysis> getAnalysesStream(Map<String, Object> filter, Map<String, Integer> page) {
+    val response = analysisRepository.getAnalyses(filter, page);
     val hitStream = Arrays.stream(response.getHits().getHits());
-    return hitStream.map(AnalysisService::hitToAnalysis).collect(toUnmodifiableList());
+    return hitStream.map(AnalysisService::hitToAnalysis);
   }
 
   public Analysis getAnalysisById(String analysisId) {
@@ -129,8 +127,7 @@ public class AnalysisService {
     if (analysisType != null) {
       filter.put(ANALYSIS_TYPE, analysisType);
     }
-    val donorNormalAnalyses = getAnalyses(filter);
-    return donorNormalAnalyses.stream()
+    return getAnalysesStream(filter, null)
         .flatMap(this::getSampleMatchedAnalysisPairs)
         .collect(toUnmodifiableList());
   }
@@ -147,7 +144,7 @@ public class AnalysisService {
     val flattenedSamples = getFlattenedSamplesFromAnalysis(analysis);
     val experimentalStrategy = analysis.getExperiment().get("experimental_strategy");
 
-    // short circuit return if can't find sample matched pairs for analysisFromId
+    // short circuit return if not enough data to find matched pairs for given analysis
     if (experimentalStrategy == null || flattenedSamples.size() != 1) {
       return empty();
     }
