@@ -120,6 +120,9 @@ public class AnalysisRepository {
                     "donors.specimens.samples",
                     new TermQueryBuilder("donors.specimens.samples.submitter_sample_id", value),
                     ScoreMode.None))
+        .put(
+            EXPERIMENTAL_STRATEGY,
+            value -> new TermQueryBuilder("experiment.experimental_strategy", value))
         .build();
   }
 

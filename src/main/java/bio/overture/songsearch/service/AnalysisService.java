@@ -21,7 +21,6 @@ package bio.overture.songsearch.service;
 import static bio.overture.songsearch.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
 import static bio.overture.songsearch.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static bio.overture.songsearch.config.constants.SearchFields.*;
-import static bio.overture.songsearch.model.Specimen.NORMAL_DESIGNATION;
 import static bio.overture.songsearch.model.enums.AnalysisState.PUBLISHED;
 import static bio.overture.songsearch.model.enums.SpecimenType.NORMAL;
 import static bio.overture.songsearch.model.enums.SpecimenType.TUMOUR;
@@ -33,7 +32,6 @@ import bio.overture.songsearch.repository.AnalysisRepository;
 import com.google.common.collect.ImmutableMap;
 import java.util.*;
 import java.util.stream.Stream;
-
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -122,15 +120,15 @@ public class AnalysisService {
   }
 
   @SneakyThrows
-  public List<SampleMatchedAnalysisPair> getNew(@NonNull String donorId, @NonNull String analysisType) {
+  public List<SampleMatchedAnalysisPair> getSampleMatchedAnalysesForDonor(
+      @NonNull String donorId, String analysisType) {
     val filter = new HashMap<String, Object>();
     filter.put(DONOR_ID, donorId);
     filter.put(ANALYSIS_STATE, PUBLISHED);
-    filter.put(
-        TUMOUR_NORMAL_DESIGNATION,
-        NORMAL_DESIGNATION); // fetch normal for donor only, otherwise chaos
-    filter.put(ANALYSIS_TYPE, analysisType);
-
+    filter.put(TUMOUR_NORMAL_DESIGNATION, NORMAL);
+    if (analysisType != null) {
+      filter.put(ANALYSIS_TYPE, analysisType);
+    }
     val donorNormalAnalyses = getAnalyses(filter);
     return donorNormalAnalyses.stream()
         .flatMap(this::getSampleMatchedAnalysisPairs)
@@ -159,21 +157,17 @@ public class AnalysisService {
 
     val filter = ImmutableMap.<String, Object>builder();
 
-    if (flattenedSampleOfInterest
-        .getTumourNormalDesignation()
-        .equalsIgnoreCase(TUMOUR.toString())) {
+    if (tumourNormalDesignation.equalsIgnoreCase(TUMOUR.toString())) {
       filter.put(
           SUBMITTER_SAMPLE_ID, flattenedSampleOfInterest.getMatchedNormalSubmitterSampleId());
-    } else if (flattenedSampleOfInterest
-        .getTumourNormalDesignation()
-        .equalsIgnoreCase(NORMAL.toString())) {
+    } else if (tumourNormalDesignation.equalsIgnoreCase(NORMAL.toString())) {
       filter.put(
           MATCHED_NORMAL_SUBMITTER_SAMPLE_ID, flattenedSampleOfInterest.getSubmitterSampleId());
     }
 
     filter.put(ANALYSIS_TYPE, analysis.getAnalysisType());
     filter.put(ANALYSIS_STATE, PUBLISHED.toString());
-    filter.put("experiment.experimental_strategy", experimentalStrategy);
+    filter.put(EXPERIMENTAL_STRATEGY, experimentalStrategy);
 
     return getAnalyses(filter.build(), null).stream()
         .map(

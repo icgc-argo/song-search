@@ -18,6 +18,8 @@
 
 package bio.overture.songsearch.graphql;
 
+import static bio.overture.songsearch.config.constants.SearchFields.ANALYSIS_TYPE;
+import static bio.overture.songsearch.config.constants.SearchFields.DONOR_ID;
 import static bio.overture.songsearch.utils.JacksonUtils.convertValue;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
@@ -89,11 +91,12 @@ public class AnalysisDataFetcher {
     };
   }
 
-  public DataFetcher<List<SampleMatchedAnalysisPair>> getNewFetcher() {
+  public DataFetcher<List<SampleMatchedAnalysisPair>> getSampleMatchedAnalysesForDonorFetcher() {
     return env -> {
-      val donorId = env.getArguments().get("donorId").toString();
-      val analysisType = env.getArguments().get("analysisType").toString();
-      return analysisService.getNew(donorId, analysisType);
+      val req = (Map<String, Object>) env.getArguments().get("req");
+      val donorId = req.get(DONOR_ID).toString();
+      val analysisType = req.get(ANALYSIS_TYPE).toString();
+      return analysisService.getSampleMatchedAnalysesForDonor(donorId, analysisType);
     };
   }
 }
