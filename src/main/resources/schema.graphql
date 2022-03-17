@@ -232,9 +232,9 @@ extend type Query {
     """
     sampleMatchedAnalysisPairs(analysisId: String!): [SampleMatchedAnalysisPair]
     """
-    Given an donorId, this query fetches all of its published normal analyses then fetches all
-    matched tumour analyses that are published of same analysis type and experimental strategy.
-    The analysisType can be added to further filter all pairs of that type.
+    Given a donorId, this query fetches all of its published normal analyses then fetches all
+    published matched tumour analyses with same analysis type and experimental strategy.
+    The analysisType can also be included to further filter the pairs by type.
     """
     sampleMatchedAnalysesForDonor(req: SampleMatchedAnalysesForDonorReq!): [SampleMatchedAnalysisPair]
 }
