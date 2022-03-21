@@ -214,6 +214,11 @@ type AggregationResult {
     totalHits: String!
 }
 
+input SampleMatchedAnalysesForDonorReq {
+    donorId: String!
+    analysisType: String
+}
+
 extend type Query {
     analyses(filter: AnalysisFilter, page: Page, sorts: [AnalysisSort!]): AnalysesSearchResult!
     aggregateAnalyses(filter: AnalysisFilter): AggregationResult!
@@ -226,4 +231,10 @@ extend type Query {
     Non PUBLISHED analyses are ignored.
     """
     sampleMatchedAnalysisPairs(analysisId: String!): [SampleMatchedAnalysisPair]
+    """
+    Given a donorId, this query fetches all of its published normal analyses then fetches all
+    published matched tumour analyses with same analysis type and experimental strategy.
+    The analysisType can also be included to further filter the pairs by type.
+    """
+    sampleMatchedAnalysesForDonor(req: SampleMatchedAnalysesForDonorReq!): [SampleMatchedAnalysisPair]
 }

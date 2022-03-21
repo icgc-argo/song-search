@@ -92,6 +92,13 @@ public class AnalysisRepository {
                     new TermQueryBuilder("donors.specimens.specimen_id", value),
                     ScoreMode.None))
         .put(
+            TUMOUR_NORMAL_DESIGNATION,
+            value ->
+                new NestedQueryBuilder(
+                    "donors.specimens",
+                    new TermQueryBuilder("donors.specimens.tumour_normal_designation", value),
+                    ScoreMode.None))
+        .put(
             SAMPLE_ID,
             value ->
                 new NestedQueryBuilder(
@@ -113,6 +120,9 @@ public class AnalysisRepository {
                     "donors.specimens.samples",
                     new TermQueryBuilder("donors.specimens.samples.submitter_sample_id", value),
                     ScoreMode.None))
+        .put(
+            EXPERIMENTAL_STRATEGY,
+            value -> new TermQueryBuilder("experiment.experimental_strategy", value))
         .build();
   }
 
@@ -181,7 +191,8 @@ public class AnalysisRepository {
     }
 
     // es 7.0+ by default caps total hits up to 10,000 if not explicitly told to track all hits
-    // more info: https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
+    // more info:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
     searchSourceBuilder.trackTotalHits(true);
 
     return searchSourceBuilder;

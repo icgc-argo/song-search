@@ -140,6 +140,11 @@ public class GraphQLProvider {
                 .dataFetcher(
                     "sampleMatchedAnalysisPairs",
                     analysisDataFetcher.getSampleMatchedAnalysisPairsFetcher()))
+        .type(
+            newTypeWiring("Query")
+                .dataFetcher(
+                    "sampleMatchedAnalysesForDonor",
+                    analysisDataFetcher.getSampleMatchedAnalysesForDonorFetcher()))
         .build();
   }
 

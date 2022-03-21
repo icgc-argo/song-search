@@ -26,9 +26,7 @@ public class AnalysisFileFilter {
       return false;
     }
     if (analysisTools != null
-        && !ofNullable(file.getAnalysisTools())
-            .orElse(emptyList())
-            .containsAll(analysisTools)) {
+        && !ofNullable(file.getAnalysisTools()).orElse(emptyList()).containsAll(analysisTools)) {
       return false;
     }
     return true;
