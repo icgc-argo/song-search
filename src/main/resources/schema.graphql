@@ -131,6 +131,9 @@ input AnalysisFileFilter {
     fileType: String
     fileAccess: String
     dataType: String
+    """
+    Filter returns files with all values in analysisTools array
+    """
     analysisTools: [String]
 }
 
@@ -141,7 +144,10 @@ input FileFilter {
     dataType: String
     analysisId: String
     studyId: String
-    donorId: String
+    donorId: String   
+    """
+    Filter returns files with all values in analysisTools array
+    """
     analysisTools: [String]
 }
 
