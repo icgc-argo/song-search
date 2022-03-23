@@ -39,10 +39,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.NestedQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
-import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -85,8 +82,11 @@ public class FileRepository {
             ANALYSIS_TOOLS,
             value -> {
               if (value instanceof List) {
-                // TermsQueryBuilder breaks with List, so convert to array
-                return new TermsQueryBuilder("analysis_tools", ((List<?>) value).toArray());
+                val boolQuery = new BoolQueryBuilder();
+                ((List<?>) value)
+                    .forEach(
+                        v -> boolQuery.must(new TermsQueryBuilder("analysis_tools", v.toString())));
+                return boolQuery;
               }
               return new TermsQueryBuilder("analysis_tools", value);
             })
