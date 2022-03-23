@@ -95,7 +95,7 @@ public class AnalysisDataFetcher {
     return env -> {
       val req = (Map<String, Object>) env.getArguments().get("req");
       val donorId = req.get(DONOR_ID).toString();
-      val analysisType = req.get(ANALYSIS_TYPE).toString();
+      val analysisType = req.get(ANALYSIS_TYPE) == null ? null : req.get(ANALYSIS_TYPE).toString();
       return analysisService.getSampleMatchedAnalysesForDonor(donorId, analysisType);
     };
   }
