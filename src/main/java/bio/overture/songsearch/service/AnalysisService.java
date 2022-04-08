@@ -119,13 +119,17 @@ public class AnalysisService {
 
   @SneakyThrows
   public List<SampleMatchedAnalysisPair> getSampleMatchedAnalysesForDonor(
-      @NonNull String donorId, String analysisType) {
+      @NonNull SampleMatchedAnalysesForDonorReq req) {
     val filter = new HashMap<String, Object>();
-    filter.put(DONOR_ID, donorId);
+    filter.put(DONOR_ID, req.getDonorId());
     filter.put(ANALYSIS_STATE, PUBLISHED);
+    // fetch donor normal samples and use those to fetch tumour later
     filter.put(TUMOUR_NORMAL_DESIGNATION, NORMAL);
-    if (analysisType != null) {
-      filter.put(ANALYSIS_TYPE, analysisType);
+    if (req.getAnalysisType() != null) {
+      filter.put(ANALYSIS_TYPE, req.getAnalysisType());
+    }
+    if (req.getStudyId() != null) {
+      filter.put(STUDY_ID, req.getStudyId());
     }
     return getAnalysesStream(filter, null)
         .flatMap(this::getSampleMatchedAnalysisPairs)
@@ -165,6 +169,8 @@ public class AnalysisService {
     filter.put(ANALYSIS_TYPE, analysis.getAnalysisType());
     filter.put(ANALYSIS_STATE, PUBLISHED.toString());
     filter.put(EXPERIMENTAL_STRATEGY, experimentalStrategy);
+    filter.put(STUDY_ID, analysis.getStudyId());
+    filter.put(DONOR_ID, flattenedSampleOfInterest.getDonorId());
 
     return getAnalyses(filter.build(), null).stream()
         .map(
@@ -183,18 +189,20 @@ public class AnalysisService {
                         sp -> {
                           val designation = sp.getTumourNormalDesignation();
                           return sp.getSamples().stream()
-                              .map(sam -> new FlatDonorSample(sam, designation));
+                              .map(sam -> new FlatDonorSample(d, sam, designation));
                         }))
         .collect(toUnmodifiableList());
   }
 
   @Value
-  static class FlatDonorSample {
+  private static class FlatDonorSample {
+    String donorId;
     String tumourNormalDesignation;
     String submitterSampleId;
     String matchedNormalSubmitterSampleId;
 
-    FlatDonorSample(Sample sample, String tumourNormalDesignation) {
+    FlatDonorSample(Donor donor, Sample sample, String tumourNormalDesignation) {
+      this.donorId = donor.getDonorId();
       this.tumourNormalDesignation = tumourNormalDesignation;
       this.submitterSampleId = sample.getSubmitterSampleId();
       this.matchedNormalSubmitterSampleId = sample.getMatchedNormalSubmitterSampleId();

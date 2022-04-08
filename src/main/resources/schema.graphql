@@ -222,6 +222,7 @@ type AggregationResult {
 
 input SampleMatchedAnalysesForDonorReq {
     donorId: String!
+    studyId: String
     analysisType: String
 }
 
