@@ -10,4 +10,5 @@ public class SampleMatchedAnalysesForDonorReq {
   @NonNull private String donorId;
   private String studyId;
   private String analysisType;
+  private String sampleType;
 }

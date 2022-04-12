@@ -124,6 +124,7 @@ input AnalysisFilter {
     donorId: String
     specimenId: String
     sampleId: String
+    sampleType: String
     runId: String
 }
 
@@ -224,6 +225,7 @@ input SampleMatchedAnalysesForDonorReq {
     donorId: String!
     studyId: String
     analysisType: String
+    sampleType: String
 }
 
 extend type Query {
