@@ -234,8 +234,8 @@ extend type Query {
     files(filter: FileFilter, page: Page, sorts: [FileSort!]): FilesSearchResult!
     aggregateFiles(filter: FileFilter): AggregationResult!
     """
-    Given an analysisId, match it to its tumour-normal counter part with same experimental strategy,
-    donorId and studyId.
+    Given an analysisId, match it to its tumour-normal counter part with same experimental_strategy,
+    analysisType, sampleType, donorId and studyId.
     If analysis is tumour matches matchedNormalSubmitterSampleId to analyses with same submitterSampleId.
     If analysis is normal matches submitterSampleId and matchedNormalSubmitterSampleId.
     Non PUBLISHED analyses are ignored.
@@ -243,8 +243,8 @@ extend type Query {
     sampleMatchedAnalysisPairs(analysisId: String!): [SampleMatchedAnalysisPair]
     """
     Given a donorId, this query fetches all of its published normal analyses then fetches all
-    published matched tumour analyses with same analysis type, studyId, donorId and
-    experimental strategy.
+    published matched tumour analyses with same analysisType, sampleType, studyId, donorId and
+    experimental_strategy.
     The analysisType can be included to further filter the pairs by type.
     The studyId can be included to only fetch pairs for donor within a study.
     """
