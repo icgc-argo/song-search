@@ -45,4 +45,5 @@ public class SearchFields {
   public static final String UPDATED_AT = "updatedAt";
   public static final String FIRST_PUBLISHED_AT = "firstPublishedAt";
   public static final String EXPERIMENTAL_STRATEGY = "experimentalStrategy";
+  public static final String SAMPLE_TYPE = "sampleType";
 }

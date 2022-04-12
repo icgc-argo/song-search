@@ -123,6 +123,13 @@ public class AnalysisRepository {
         .put(
             EXPERIMENTAL_STRATEGY,
             value -> new TermQueryBuilder("experiment.experimental_strategy", value))
+        .put(
+            SAMPLE_TYPE,
+            value ->
+                new NestedQueryBuilder(
+                    "donors.specimens.samples",
+                    new TermQueryBuilder("donors.specimens.samples.sample_type", value),
+                    ScoreMode.None))
         .build();
   }
 

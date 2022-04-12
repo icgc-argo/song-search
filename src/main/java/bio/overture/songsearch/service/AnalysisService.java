@@ -131,6 +131,9 @@ public class AnalysisService {
     if (req.getStudyId() != null) {
       filter.put(STUDY_ID, req.getStudyId());
     }
+    if (req.getSampleType() != null) {
+      filter.put(SAMPLE_TYPE, req.getSampleType());
+    }
     return getAnalysesStream(filter, null)
         .flatMap(this::getSampleMatchedAnalysisPairs)
         .collect(toUnmodifiableList());
@@ -171,6 +174,7 @@ public class AnalysisService {
     filter.put(EXPERIMENTAL_STRATEGY, experimentalStrategy);
     filter.put(STUDY_ID, analysis.getStudyId());
     filter.put(DONOR_ID, flattenedSampleOfInterest.getDonorId());
+    filter.put(SAMPLE_TYPE, flattenedSampleOfInterest.getSampleType());
 
     return getAnalyses(filter.build(), null).stream()
         .map(
@@ -200,12 +204,14 @@ public class AnalysisService {
     String tumourNormalDesignation;
     String submitterSampleId;
     String matchedNormalSubmitterSampleId;
+    String sampleType;
 
     FlatDonorSample(Donor donor, Sample sample, String tumourNormalDesignation) {
       this.donorId = donor.getDonorId();
       this.tumourNormalDesignation = tumourNormalDesignation;
       this.submitterSampleId = sample.getSubmitterSampleId();
       this.matchedNormalSubmitterSampleId = sample.getMatchedNormalSubmitterSampleId();
+      this.sampleType = sample.getSampleType();
     }
   }
 }
