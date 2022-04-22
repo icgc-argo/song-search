@@ -149,7 +149,7 @@ public class AnalysisService {
     }
 
     val flattenedSamples = getFlattenedSamplesFromAnalysis(analysis);
-    val experimentalStrategy = analysis.getExperiment().get("experimental_strategy");
+    val experimentalStrategy = analysis.getExperimentalStrategy();
 
     // short circuit return if not enough data to find matched pairs for given analysis
     if (experimentalStrategy == null || flattenedSamples.size() != 1) {

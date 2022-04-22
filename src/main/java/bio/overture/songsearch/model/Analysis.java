@@ -36,6 +36,8 @@ import lombok.val;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Analysis {
+  private static final String EXPERIMENT_KEY_EXPERIMENTAL_STRATEGY = "experimental_strategy";
+  private static final String EXPERIMENT_KEY_LIBRARY_STRATEGY = "library_strategy";
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private String analysisId;
@@ -71,6 +73,15 @@ public class Analysis {
     val fileFilter =
         MAPPER.convertValue(env.getArguments().get("filter"), AnalysisFileFilter.class);
     return files.stream().filter(fileFilter::test).collect(Collectors.toList());
+  }
+
+  public Object getExperimentalStrategy() {
+    // Analysis.experiment.experimental_strategy and experiment.library_strategy are the SAME fields,
+    // currently because of historical reasons, some analyses use experimental_strategy and some
+    // use library_strategy, tickets are made to ensure all analyses use experimental_strategy in
+    // the future, but for now we must consider both fields.
+    return experiment.getOrDefault(EXPERIMENT_KEY_EXPERIMENTAL_STRATEGY,
+            experiment.get(EXPERIMENT_KEY_LIBRARY_STRATEGY));
   }
 
   @SneakyThrows
