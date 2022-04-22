@@ -75,13 +75,13 @@ public class Analysis {
     return files.stream().filter(fileFilter::test).collect(Collectors.toList());
   }
 
-  public Object getExperimentalStrategy() {
-    // Analysis.experiment.experimental_strategy and experiment.library_strategy are the SAME fields,
+  public Object getExperimentStrategy() {
+    // experiment.experimental_strategy and experiment.library_strategy are the SAME fields,
     // currently because of historical reasons, some analyses use experimental_strategy and some
     // use library_strategy, tickets are made to ensure all analyses use experimental_strategy in
     // the future, but for now we must consider both fields.
-    return experiment.getOrDefault(EXPERIMENT_KEY_EXPERIMENTAL_STRATEGY,
-            experiment.get(EXPERIMENT_KEY_LIBRARY_STRATEGY));
+    return experiment.getOrDefault(
+        EXPERIMENT_KEY_EXPERIMENTAL_STRATEGY, experiment.get(EXPERIMENT_KEY_LIBRARY_STRATEGY));
   }
 
   @SneakyThrows

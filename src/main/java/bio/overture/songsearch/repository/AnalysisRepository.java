@@ -122,11 +122,11 @@ public class AnalysisRepository {
                     new TermQueryBuilder("donors.specimens.samples.submitter_sample_id", value),
                     ScoreMode.None))
         .put(
-            EXPERIMENTAL_STRATEGY,
-            value ->  {
+            EXPERIMENT_STRATEGY,
+            value -> {
               val bool = new BoolQueryBuilder();
-              // older analyses might have library_strategy isntead of experimental_strategy
-              // so use should (logical OR) to look for either
+              // strategy can come from library_strategy or experimental_strategy
+              // so use should (logical OR) to look in either
               bool.should(new TermQueryBuilder("experiment.experimental_strategy", value));
               bool.should(new TermQueryBuilder("experiment.library_strategy", value));
               // make sure at least one of them match
