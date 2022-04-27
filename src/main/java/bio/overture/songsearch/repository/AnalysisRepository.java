@@ -44,6 +44,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -121,8 +122,17 @@ public class AnalysisRepository {
                     new TermQueryBuilder("donors.specimens.samples.submitter_sample_id", value),
                     ScoreMode.None))
         .put(
-            EXPERIMENTAL_STRATEGY,
-            value -> new TermQueryBuilder("experiment.experimental_strategy", value))
+            EXPERIMENT_STRATEGY,
+            value -> {
+              val bool = new BoolQueryBuilder();
+              // strategy can come from library_strategy or experimental_strategy
+              // so use should (logical OR) to look in either
+              bool.should(new TermQueryBuilder("experiment.experimental_strategy", value));
+              bool.should(new TermQueryBuilder("experiment.library_strategy", value));
+              // make sure at least one of them match
+              bool.minimumShouldMatch(1);
+              return bool;
+            })
         .put(
             SAMPLE_TYPE,
             value ->

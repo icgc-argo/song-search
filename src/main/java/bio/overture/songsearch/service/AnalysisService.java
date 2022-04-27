@@ -149,10 +149,10 @@ public class AnalysisService {
     }
 
     val flattenedSamples = getFlattenedSamplesFromAnalysis(analysis);
-    val experimentalStrategy = analysis.getExperiment().get("experimental_strategy");
+    val experimentStrategy = analysis.getExperimentStrategy();
 
     // short circuit return if not enough data to find matched pairs for given analysis
-    if (experimentalStrategy == null || flattenedSamples.size() != 1) {
+    if (experimentStrategy == null || flattenedSamples.size() != 1) {
       return empty();
     }
 
@@ -171,7 +171,7 @@ public class AnalysisService {
 
     filter.put(ANALYSIS_TYPE, analysis.getAnalysisType());
     filter.put(ANALYSIS_STATE, PUBLISHED.toString());
-    filter.put(EXPERIMENTAL_STRATEGY, experimentalStrategy);
+    filter.put(EXPERIMENT_STRATEGY, experimentStrategy);
     filter.put(STUDY_ID, analysis.getStudyId());
     filter.put(DONOR_ID, flattenedSampleOfInterest.getDonorId());
     filter.put(SAMPLE_TYPE, flattenedSampleOfInterest.getSampleType());
