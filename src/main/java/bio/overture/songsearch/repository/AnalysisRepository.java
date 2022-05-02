@@ -19,7 +19,8 @@
 package bio.overture.songsearch.repository;
 
 import static bio.overture.songsearch.config.constants.SearchFields.*;
-import static bio.overture.songsearch.utils.ElasticsearchQueryUtils.*;
+import static bio.overture.songsearch.utils.ElasticsearchQueryUtils.queryFromArgs;
+import static bio.overture.songsearch.utils.ElasticsearchQueryUtils.sortsToEsSortBuilders;
 import static java.util.Collections.emptyList;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.search.sort.SortOrder.ASC;
@@ -27,7 +28,8 @@ import static org.elasticsearch.search.sort.SortOrder.ASC;
 import bio.overture.songsearch.config.ElasticsearchProperties;
 import bio.overture.songsearch.model.Sort;
 import com.google.common.collect.ImmutableMap;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -42,6 +44,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -53,7 +56,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class AnalysisRepository {
-  private static final Map<String, Function<String, AbstractQueryBuilder<?>>> QUERY_RESOLVER =
+  private static final Map<String, Function<Object, AbstractQueryBuilder<?>>> QUERY_RESOLVER =
       argumentPathMap();
 
   private static final Map<String, FieldSortBuilder> SORT_BUILDER_RESOLVER = sortPathMap();
@@ -69,8 +72,8 @@ public class AnalysisRepository {
     this.analysisCentricIndex = elasticSearchProperties.getAnalysisCentricIndex();
   }
 
-  private static Map<String, Function<String, AbstractQueryBuilder<?>>> argumentPathMap() {
-    return ImmutableMap.<String, Function<String, AbstractQueryBuilder<?>>>builder()
+  private static Map<String, Function<Object, AbstractQueryBuilder<?>>> argumentPathMap() {
+    return ImmutableMap.<String, Function<Object, AbstractQueryBuilder<?>>>builder()
         .put(ANALYSIS_ID, value -> new TermQueryBuilder("analysis_id", value))
         .put(ANALYSIS_TYPE, value -> new TermQueryBuilder("analysis_type", value))
         .put(ANALYSIS_VERSION, value -> new TermQueryBuilder("analysis_version", value))
@@ -88,6 +91,13 @@ public class AnalysisRepository {
                 new NestedQueryBuilder(
                     "donors.specimens",
                     new TermQueryBuilder("donors.specimens.specimen_id", value),
+                    ScoreMode.None))
+        .put(
+            TUMOUR_NORMAL_DESIGNATION,
+            value ->
+                new NestedQueryBuilder(
+                    "donors.specimens",
+                    new TermQueryBuilder("donors.specimens.tumour_normal_designation", value),
                     ScoreMode.None))
         .put(
             SAMPLE_ID,
@@ -110,6 +120,25 @@ public class AnalysisRepository {
                 new NestedQueryBuilder(
                     "donors.specimens.samples",
                     new TermQueryBuilder("donors.specimens.samples.submitter_sample_id", value),
+                    ScoreMode.None))
+        .put(
+            EXPERIMENT_STRATEGY,
+            value -> {
+              val bool = new BoolQueryBuilder();
+              // strategy can come from library_strategy or experimental_strategy
+              // so use should (logical OR) to look in either
+              bool.should(new TermQueryBuilder("experiment.experimental_strategy", value));
+              bool.should(new TermQueryBuilder("experiment.library_strategy", value));
+              // make sure at least one of them match
+              bool.minimumShouldMatch(1);
+              return bool;
+            })
+        .put(
+            SAMPLE_TYPE,
+            value ->
+                new NestedQueryBuilder(
+                    "donors.specimens.samples",
+                    new TermQueryBuilder("donors.specimens.samples.sample_type", value),
                     ScoreMode.None))
         .build();
   }
@@ -179,7 +208,8 @@ public class AnalysisRepository {
     }
 
     // es 7.0+ by default caps total hits up to 10,000 if not explicitly told to track all hits
-    // more info: https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
+    // more info:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#track-total-hits-10000-default
     searchSourceBuilder.trackTotalHits(true);
 
     return searchSourceBuilder;

@@ -17,7 +17,7 @@ type Analysis @key(fields: "analysisId") {
     firstPublishedAt: String
     studyId: String
     donors: [Donor]
-    files: [AnalysisFile]
+    files(filter: AnalysisFileFilter): [AnalysisFile] @fetch(from: "files")
     repositories: [Repository]
     experiment: JSON
     workflow: Workflow
@@ -38,6 +38,8 @@ type AnalysisFile {
     md5Sum: String
     fileAccess: String
     dataType: String
+    metrics: JSON
+    analysisTools: [String]
 }
 
 type Specimen {
@@ -75,6 +77,8 @@ type File @key(fields: "objectId") {
     file: FileMeta
     repositories: [Repository]
     donors: [Donor]
+    metrics: JSON
+    analysisTools: [String]
 }
 
 type FileAnalysis {
@@ -120,7 +124,18 @@ input AnalysisFilter {
     donorId: String
     specimenId: String
     sampleId: String
+    sampleType: String
     runId: String
+}
+
+input AnalysisFileFilter {
+    fileType: String
+    fileAccess: String
+    dataType: String
+    """
+    Filter returns files with all values in analysisTools array
+    """
+    analysisTools: [String]
 }
 
 input FileFilter {
@@ -130,7 +145,11 @@ input FileFilter {
     dataType: String
     analysisId: String
     studyId: String
-    donorId: String
+    donorId: String   
+    """
+    Filter returns files with all values in analysisTools array
+    """
+    analysisTools: [String]
 }
 
 input Page {
@@ -202,16 +221,32 @@ type AggregationResult {
     totalHits: String!
 }
 
+input SampleMatchedAnalysesForDonorReq {
+    donorId: String!
+    studyId: String
+    analysisType: String
+    sampleType: String
+}
+
 extend type Query {
     analyses(filter: AnalysisFilter, page: Page, sorts: [AnalysisSort!]): AnalysesSearchResult!
     aggregateAnalyses(filter: AnalysisFilter): AggregationResult!
     files(filter: FileFilter, page: Page, sorts: [FileSort!]): FilesSearchResult!
     aggregateFiles(filter: FileFilter): AggregationResult!
     """
-    Given an analysisId, match it to its tumour-normal counter part with same experimental strategy.
+    Given an analysisId, match it to its tumour-normal counter part with same experimental_strategy,
+    analysisType, sampleType, donorId and studyId.
     If analysis is tumour matches matchedNormalSubmitterSampleId to analyses with same submitterSampleId.
     If analysis is normal matches submitterSampleId and matchedNormalSubmitterSampleId.
     Non PUBLISHED analyses are ignored.
     """
     sampleMatchedAnalysisPairs(analysisId: String!): [SampleMatchedAnalysisPair]
+    """
+    Given a donorId, this query fetches all of its published normal analyses then fetches all
+    published matched tumour analyses with same analysisType, sampleType, studyId, donorId and
+    experimental_strategy.
+    The analysisType can be included to further filter the pairs by type.
+    The studyId can be included to only fetch pairs for donor within a study.
+    """
+    sampleMatchedAnalysesForDonor(req: SampleMatchedAnalysesForDonorReq!): [SampleMatchedAnalysisPair]
 }

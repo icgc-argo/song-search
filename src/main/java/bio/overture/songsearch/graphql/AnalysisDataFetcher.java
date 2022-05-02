@@ -88,4 +88,11 @@ public class AnalysisDataFetcher {
       return analysisService.getSampleMatchedAnalysisPairs(analysisId);
     };
   }
+
+  public DataFetcher<List<SampleMatchedAnalysisPair>> getSampleMatchedAnalysesForDonorFetcher() {
+    return env -> {
+      val req = convertValue(env.getArguments().get("req"), SampleMatchedAnalysesForDonorReq.class);
+      return analysisService.getSampleMatchedAnalysesForDonor(req);
+    };
+  }
 }

@@ -23,16 +23,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.val;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Analysis {
+  private static final String EXPERIMENT_KEY_EXPERIMENTAL_STRATEGY = "experimental_strategy";
+  private static final String EXPERIMENT_KEY_LIBRARY_STRATEGY = "library_strategy";
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private String analysisId;
@@ -61,21 +66,26 @@ public class Analysis {
 
   private String firstPublishedAt;
 
+  public List<AnalysisFile> getFiles(DataFetchingEnvironment env) {
+    if (env.getArguments().get("filter") == null) {
+      return files;
+    }
+    val fileFilter =
+        MAPPER.convertValue(env.getArguments().get("filter"), AnalysisFileFilter.class);
+    return files.stream().filter(fileFilter::test).collect(Collectors.toList());
+  }
+
+  public Object getExperimentStrategy() {
+    // experiment.experimental_strategy and experiment.library_strategy are the SAME fields,
+    // currently because of historical reasons, some analyses use experimental_strategy and some
+    // use library_strategy, tickets are made to ensure all analyses use experimental_strategy in
+    // the future, but for now we must consider both fields.
+    return experiment.getOrDefault(
+        EXPERIMENT_KEY_EXPERIMENTAL_STRATEGY, experiment.get(EXPERIMENT_KEY_LIBRARY_STRATEGY));
+  }
+
   @SneakyThrows
   public static Analysis parse(@NonNull Map<String, Object> sourceMap) {
     return MAPPER.convertValue(sourceMap, Analysis.class);
-  }
-
-  @Data
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-  public static final class AnalysisFile {
-    private String objectId;
-    private String name;
-    private Long size;
-    private String fileType;
-    private String md5Sum;
-    private String fileAccess;
-    private String dataType;
   }
 }

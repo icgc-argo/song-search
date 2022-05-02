@@ -23,7 +23,10 @@ import static bio.overture.songsearch.config.constants.EsDefaults.ES_PAGE_DEFAUL
 import static bio.overture.songsearch.config.constants.SearchFields.FILE_OBJECT_ID;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
-import bio.overture.songsearch.model.*;
+import bio.overture.songsearch.model.AggregationResult;
+import bio.overture.songsearch.model.File;
+import bio.overture.songsearch.model.SearchResult;
+import bio.overture.songsearch.model.Sort;
 import bio.overture.songsearch.repository.FileRepository;
 import java.util.Arrays;
 import java.util.List;

@@ -18,6 +18,8 @@
 
 package bio.overture.songsearch.graphql;
 
+import static graphql.Scalars.GraphQLLong;
+import static graphql.scalars.ExtendedScalars.Json;
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
 import bio.overture.songsearch.config.websecurity.AuthProperties;
@@ -32,7 +34,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import graphql.GraphQL;
 import graphql.execution.AsyncExecutionStrategy;
-import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
 import java.io.IOException;
@@ -123,7 +124,8 @@ public class GraphQLProvider {
 
   private RuntimeWiring buildWiring() {
     return RuntimeWiring.newRuntimeWiring()
-        .scalar(ExtendedScalars.Json)
+        .scalar(GraphQLLong)
+        .scalar(Json)
         .type(
             newTypeWiring("Query")
                 .dataFetcher("analyses", analysisDataFetcher.getAnalysesDataFetcher()))
@@ -140,6 +142,11 @@ public class GraphQLProvider {
                 .dataFetcher(
                     "sampleMatchedAnalysisPairs",
                     analysisDataFetcher.getSampleMatchedAnalysisPairsFetcher()))
+        .type(
+            newTypeWiring("Query")
+                .dataFetcher(
+                    "sampleMatchedAnalysesForDonor",
+                    analysisDataFetcher.getSampleMatchedAnalysesForDonorFetcher()))
         .build();
   }
 
