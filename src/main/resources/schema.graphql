@@ -21,6 +21,7 @@ type Analysis @key(fields: "analysisId") {
     repositories: [Repository]
     experiment: JSON
     workflow: Workflow
+    code: String
 }
 
 type Donor {

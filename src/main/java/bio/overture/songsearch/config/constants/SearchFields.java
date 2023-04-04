@@ -26,6 +26,8 @@ import lombok.NoArgsConstructor;
 public class SearchFields {
   public static final String ANALYSIS_ID = "analysisId";
   public static final String ANALYSIS_TYPE = "analysisType";
+
+  public static final String REPOSITORY_CODE = "code";
   public static final String ANALYSIS_VERSION = "analysisVersion";
   public static final String ANALYSIS_STATE = "analysisState";
   public static final String FILE_OBJECT_ID = "objectId";
