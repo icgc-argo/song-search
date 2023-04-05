@@ -126,6 +126,7 @@ input AnalysisFilter {
     sampleId: String
     sampleType: String
     runId: String
+    code: String
 }
 
 input AnalysisFileFilter {
