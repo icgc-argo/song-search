@@ -21,7 +21,6 @@ type Analysis @key(fields: "analysisId") {
     repositories: [Repository]
     experiment: JSON
     workflow: Workflow
-    code: String
 }
 
 type Donor {
@@ -127,6 +126,7 @@ input AnalysisFilter {
     sampleId: String
     sampleType: String
     runId: String
+    code: String
 }
 
 input AnalysisFileFilter {
