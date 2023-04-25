@@ -21,14 +21,17 @@ package bio.overture.songsearch.service;
 import static bio.overture.songsearch.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
 import static bio.overture.songsearch.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static bio.overture.songsearch.config.constants.SearchFields.*;
+import static bio.overture.songsearch.config.kafka.AnalysisMessage.createAnalysisMessage;
 import static bio.overture.songsearch.model.enums.AnalysisState.PUBLISHED;
 import static bio.overture.songsearch.model.enums.SpecimenType.NORMAL;
 import static bio.overture.songsearch.model.enums.SpecimenType.TUMOUR;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.Stream.empty;
 
+import bio.overture.songsearch.config.kafka.KafkaSender;
 import bio.overture.songsearch.model.*;
 import bio.overture.songsearch.repository.AnalysisRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.util.*;
 import java.util.stream.Stream;
@@ -45,11 +48,18 @@ import org.springframework.stereotype.Service;
 public class AnalysisService {
 
   private final AnalysisRepository analysisRepository;
+  private String songServerId;
+  private final KafkaSender sender;
+
 
   @Autowired
-  public AnalysisService(AnalysisRepository analysisRepository) {
+  public AnalysisService(AnalysisRepository analysisRepository,
+                         @NonNull KafkaSender sender) {
+
     this.analysisRepository = analysisRepository;
+    this.sender = sender;
   }
+
 
   private static Analysis hitToAnalysis(SearchHit hit) {
     val sourceMap = hit.getSourceAsMap();
@@ -214,4 +224,13 @@ public class AnalysisService {
       this.sampleType = sample.getSampleType();
     }
   }
+
+  @SneakyThrows
+  public void sendAnalysisMessage(Analysis analysis) {
+    val message = createAnalysisMessage(analysis, songServerId);
+    System.out.println("Message payload: "+message);
+    System.out.println("message after mapping: "+new ObjectMapper().writeValueAsString(message));
+    sender.send(new ObjectMapper().writeValueAsString(message), message.getAnalysisId());
+  }
+
 }

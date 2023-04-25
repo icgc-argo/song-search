@@ -52,6 +52,8 @@ public class GraphQLProvider {
   private final AnalysisDataFetcher analysisDataFetcher;
   private final FileDataFetcher fileDataFetcher;
   private final EntityDataFetcher entityDataFetcher;
+
+  private final StartAutomationMutation startAutomationMutation;
   private final AuthProperties authProperties;
   private GraphQL graphQL;
   private GraphQLSchema graphQLSchema;
@@ -61,10 +63,12 @@ public class GraphQLProvider {
       AnalysisDataFetcher analysisDataFetcher,
       FileDataFetcher fileDataFetcher,
       EntityDataFetcher entityDataFetcher,
+      StartAutomationMutation startAutomationMutation,
       AuthProperties authProperties) {
     this.analysisDataFetcher = analysisDataFetcher;
     this.fileDataFetcher = fileDataFetcher;
     this.entityDataFetcher = entityDataFetcher;
+    this.startAutomationMutation=startAutomationMutation;
     this.authProperties = authProperties;
   }
 
@@ -147,6 +151,11 @@ public class GraphQLProvider {
                 .dataFetcher(
                     "sampleMatchedAnalysesForDonor",
                     analysisDataFetcher.getSampleMatchedAnalysesForDonorFetcher()))
+        .type(
+            newTypeWiring("Mutation")
+                .dataFetcher("startAutomation", startAutomationMutation.startAutomationResolver())
+        )
+
         .build();
   }
 
