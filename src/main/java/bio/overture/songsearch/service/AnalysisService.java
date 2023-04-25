@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -45,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class AnalysisService {
 
   private final AnalysisRepository analysisRepository;
@@ -228,8 +230,7 @@ public class AnalysisService {
   @SneakyThrows
   public void sendAnalysisMessage(Analysis analysis) {
     val message = createAnalysisMessage(analysis, songServerId);
-    System.out.println("Message payload: "+message);
-    System.out.println("message after mapping: "+new ObjectMapper().writeValueAsString(message));
+    log.debug("Message payload:: "+new ObjectMapper().writeValueAsString(message));
     sender.send(new ObjectMapper().writeValueAsString(message), message.getAnalysisId());
   }
 
