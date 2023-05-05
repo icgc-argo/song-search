@@ -84,7 +84,9 @@ public class AnalysisRepository {
             REPOSITORY_CODE,
             value ->
                 new NestedQueryBuilder(
-                    "repositories", new TermQueryBuilder("repositories.code", value), ScoreMode.None))
+                    "repositories",
+                    new TermQueryBuilder("repositories.code", value),
+                    ScoreMode.None))
         .put(
             DONOR_ID,
             value ->

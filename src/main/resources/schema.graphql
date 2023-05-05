@@ -251,3 +251,11 @@ extend type Query {
     """
     sampleMatchedAnalysesForDonor(req: SampleMatchedAnalysesForDonorReq!): [SampleMatchedAnalysisPair]
 }
+
+type Mutation {
+    startAutomation(analysisId: String!): MutationResponse
+}
+
+type MutationResponse {
+    analysisId: ID
+}
