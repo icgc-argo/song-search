@@ -34,3 +34,15 @@ auth:
         - RDPC-DEV.READ
       queryAndMutation:
         - RDPC-DEV.WRITE
+---
+
+spring:
+  config:
+    activate:
+      on-profile: kafka
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      default-topic: automation_trigger #song-analysis
+
+songServerId: submission-song.collab
