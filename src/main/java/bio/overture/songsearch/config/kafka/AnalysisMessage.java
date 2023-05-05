@@ -17,12 +17,9 @@
 
 package bio.overture.songsearch.config.kafka;
 
-import bio.overture.songsearch.model.Analysis;
-import bio.overture.songsearch.model.enums.AnalysisState;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
-
 import static lombok.AccessLevel.PRIVATE;
+import bio.overture.songsearch.model.enums.AnalysisState;
+import lombok.*;
 
 @Value
 // Note: although the AllArgs and NoArgs combination below seems odd,
@@ -45,16 +42,20 @@ public class AnalysisMessage {
         analysis.getStudyId(),
         analysis.getAnalysisState().toString(),
         analysis.getRepositories().get(0).getCode(),
-        new Analysis(analysis.getAnalysisId(), new AnalysisType(analysis.getAnalysisType()), analysis.getAnalysisState(), analysis.getStudyId() ));
+        new Analysis(
+            analysis.getAnalysisId(),
+            new AnalysisType(analysis.getAnalysisType()),
+            analysis.getAnalysisState(),
+            analysis.getStudyId()));
   }
 
   @Value
   @AllArgsConstructor
-  private static class Analysis{
-     String analysisId;
-     AnalysisType analysisType;
-     AnalysisState analysisState;
-     String studyId;
+  private static class Analysis {
+    String analysisId;
+    AnalysisType analysisType;
+    AnalysisState analysisState;
+    String studyId;
   }
 
   @Data

@@ -18,25 +18,28 @@
 
 package bio.overture.songsearch.graphql;
 
-import bio.overture.songsearch.model.Analysis;
-import bio.overture.songsearch.model.SearchResult;
-import bio.overture.songsearch.model.Sort;
-import bio.overture.songsearch.service.AnalysisService;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import graphql.schema.DataFetcher;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-
+import static bio.overture.songsearch.config.kafka.AnalysisMessage.createAnalysisMessage;
 import static bio.overture.songsearch.utils.JacksonUtils.convertValue;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
+import bio.overture.songsearch.config.kafka.Sender;
+import bio.overture.songsearch.model.Analysis;
+import bio.overture.songsearch.model.Sort;
+import bio.overture.songsearch.service.AnalysisService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import graphql.schema.DataFetcher;
+import java.util.List;
+import java.util.Map;
+
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
@@ -44,11 +47,16 @@ public class StartAutomationMutation {
 
   private final AnalysisService analysisService;
 
-  @Autowired
-  public StartAutomationMutation(AnalysisService analysisService) {
-    this.analysisService = analysisService;
-  }
+  @Value("${songServerId")
+  private String songServerId;
 
+  private final Sender sender;
+
+  @Autowired
+  public StartAutomationMutation(AnalysisService analysisService, @NonNull Sender sender) {
+    this.analysisService = analysisService;
+    this.sender = sender;
+  }
 
   public DataFetcher<Analysis> startAutomationResolver() {
     return env -> {
@@ -70,14 +78,20 @@ public class StartAutomationMutation {
         }
       }
 
-      Analysis analysis = analysisService.getAnalysisById(env.getArguments().get("analysisId").toString());
+      Analysis analysis =
+          analysisService.getAnalysisById(env.getArguments().get("analysisId").toString());
       log.debug("Analysis fetched: " + analysis);
 
-      analysisService.sendAnalysisMessage(analysis);
+      sendAnalysisMessage(analysis);
       log.debug("Message sent to kafka queue");
       return analysis;
     };
   }
-  
 
+  @SneakyThrows
+  public void sendAnalysisMessage(Analysis analysis) {
+    val message = createAnalysisMessage(analysis, songServerId);
+    log.debug("Message payload:: " + new ObjectMapper().writeValueAsString(message));
+    sender.send(new ObjectMapper().writeValueAsString(message), message.getAnalysisId());
+  }
 }

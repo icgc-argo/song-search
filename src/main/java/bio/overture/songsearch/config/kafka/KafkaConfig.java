@@ -1,6 +1,7 @@
 package bio.overture.songsearch.config.kafka;
 
-
+import java.util.HashMap;
+import java.util.Map;
 import lombok.val;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -11,10 +12,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-
 
 @Configuration
 @Profile("kafka")
@@ -45,6 +42,7 @@ public class KafkaConfig {
   public KafkaTemplate<String, String> kafkaTemplate() {
     val template = new KafkaTemplate<>(producerFactory());
     template.setDefaultTopic(defaultTopic);
+    System.out.println("defaultTopic: " + defaultTopic);
     return template;
   }
 
