@@ -43,6 +43,6 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     template:
-      default-topic: automation_trigger #song-analysis
+      automation-trigger: automation_trigger #song-analysis
 
 songServerId: submission-song.collab

@@ -20,8 +20,8 @@ public class KafkaConfig {
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
 
-  @Value("${spring.kafka.template.default-topic}")
-  private String defaultTopic;
+  @Value("${spring.kafka.template.automation-trigger}")
+  private String automation_trigger;
 
   @Bean
   public Map<String, Object> producerConfigs() {
@@ -41,8 +41,7 @@ public class KafkaConfig {
   @Bean
   public KafkaTemplate<String, String> kafkaTemplate() {
     val template = new KafkaTemplate<>(producerFactory());
-    template.setDefaultTopic(defaultTopic);
-    System.out.println("defaultTopic: " + defaultTopic);
+    template.setDefaultTopic(automation_trigger);
     return template;
   }
 
