@@ -61,7 +61,6 @@ public class StartAutomationMutation {
     this.sender = sender;
   }
 
-
   public DataFetcher<AutomationMutationResponse> startAutomationResolver() {
     return env -> {
       val args = env.getArguments();
@@ -97,7 +96,6 @@ public class StartAutomationMutation {
       sendAnalysisMessage(analysis);
       log.debug("Message sent to kafka queue");
       return response;
-
     };
   }
 
