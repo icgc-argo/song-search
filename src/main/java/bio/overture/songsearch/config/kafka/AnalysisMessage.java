@@ -18,6 +18,7 @@
 package bio.overture.songsearch.config.kafka;
 
 import static lombok.AccessLevel.PRIVATE;
+
 import bio.overture.songsearch.model.enums.AnalysisState;
 import lombok.*;
 

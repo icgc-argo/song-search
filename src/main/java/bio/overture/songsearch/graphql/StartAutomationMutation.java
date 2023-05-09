@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 
 import bio.overture.songsearch.config.kafka.Sender;
 import bio.overture.songsearch.model.Analysis;
+import bio.overture.songsearch.model.AutomationMutationResponse;
 import bio.overture.songsearch.model.Sort;
 import bio.overture.songsearch.service.AnalysisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +34,6 @@ import graphql.schema.DataFetcher;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +59,7 @@ public class StartAutomationMutation {
     this.sender = sender;
   }
 
-  public DataFetcher<Analysis> startAutomationResolver() {
+  public DataFetcher<AutomationMutationResponse> startAutomationResolver() {
     return env -> {
       val args = env.getArguments();
 
@@ -83,13 +83,17 @@ public class StartAutomationMutation {
           analysisService.getAnalysisById(env.getArguments().get("analysisId").toString());
       log.debug("Analysis fetched: " + analysis);
 
-      if(Objects.isNull(analysis)){
+      if (Objects.isNull(analysis)) {
         log.debug("Analysis not found.");
-        return null;
+        AutomationMutationResponse response =
+            new AutomationMutationResponse(analysis, "Analysis not found");
+        return response;
       }
+      AutomationMutationResponse response =
+          new AutomationMutationResponse(analysis, "payload sent");
       sendAnalysisMessage(analysis);
       log.debug("Message sent to kafka queue");
-      return analysis;
+      return response;
     };
   }
 

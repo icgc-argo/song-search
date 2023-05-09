@@ -258,4 +258,5 @@ type Mutation {
 
 type MutationResponse {
     analysisId: ID
+    message: String
 }
