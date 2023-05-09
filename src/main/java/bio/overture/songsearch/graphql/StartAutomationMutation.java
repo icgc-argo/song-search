@@ -25,6 +25,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import bio.overture.songsearch.config.kafka.Sender;
 import bio.overture.songsearch.model.Analysis;
 import bio.overture.songsearch.model.AutomationMutationResponse;
+
 import bio.overture.songsearch.model.Sort;
 import bio.overture.songsearch.service.AnalysisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +35,7 @@ import graphql.schema.DataFetcher;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
