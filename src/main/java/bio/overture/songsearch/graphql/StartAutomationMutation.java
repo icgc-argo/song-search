@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import graphql.schema.DataFetcher;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -82,6 +83,10 @@ public class StartAutomationMutation {
           analysisService.getAnalysisById(env.getArguments().get("analysisId").toString());
       log.debug("Analysis fetched: " + analysis);
 
+      if(Objects.isNull(analysis)){
+        log.debug("Analysis not found.");
+        return null;
+      }
       sendAnalysisMessage(analysis);
       log.debug("Message sent to kafka queue");
       return analysis;
