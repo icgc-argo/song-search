@@ -5,7 +5,7 @@ spring:
     description: "Song Search API Documentation"
 
 server:
-  port: 8071
+  port: 8080
 
 elastic:
   host: workflow-es.rdpc-qa.cancercollaboratory.org #https://workflow-es.rdpc-qa.cancercollaboratory.org:443 #workflow-es.rdpc.cancercollaboratory.org #workflow-es.rdpc-qa.cancercollaboratory.org #workflow-es.rdpc-dev.cancercollaboratory.org #localhost
