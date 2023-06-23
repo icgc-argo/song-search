@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -42,12 +43,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class AnalysisService {
 
   private final AnalysisRepository analysisRepository;
 
   @Autowired
   public AnalysisService(AnalysisRepository analysisRepository) {
+
     this.analysisRepository = analysisRepository;
   }
 

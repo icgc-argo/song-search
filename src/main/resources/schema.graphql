@@ -126,6 +126,7 @@ input AnalysisFilter {
     sampleId: String
     sampleType: String
     runId: String
+    code: String
 }
 
 input AnalysisFileFilter {
@@ -249,4 +250,13 @@ extend type Query {
     The studyId can be included to only fetch pairs for donor within a study.
     """
     sampleMatchedAnalysesForDonor(req: SampleMatchedAnalysesForDonorReq!): [SampleMatchedAnalysisPair]
+}
+
+type Mutation {
+    startAutomation(analysisId: String!): MutationResponse
+}
+
+type MutationResponse {
+    analysis: Analysis
+    message: String
 }

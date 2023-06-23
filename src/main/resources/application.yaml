@@ -8,14 +8,25 @@ server:
   port: 8080
 
 elastic:
+  host: workflow-es.rdpc-qa.cancercollaboratory.org #https://workflow-es.rdpc-qa.cancercollaboratory.org:443 #workflow-es.rdpc.cancercollaboratory.org #workflow-es.rdpc-qa.cancercollaboratory.org #workflow-es.rdpc-dev.cancercollaboratory.org #localhost
+  port: 443 #9200
+  useHttps: true #false
+  useAuthentication: true #false
+  username: elastic
+  password: h5bdgjfh4gdqhkdcjdj5hj59 #vt92j5r5mcwgxwfvjjrc9k5d #h5bdgjfh4gdqhkdcjdj5hj59 #T8e5X9Jn5pF6rX8tCLNCEzJZ #testing
+  analysisCentricIndex: analysis_centric
+  fileCentricIndex: file_centric
+
+elasticX:
   host: localhost
   port: 9200
   useHttps: false
   useAuthentication: false
   username: elastic
-  password: testing
+  password:
   analysisCentricIndex: analysis_centric
   fileCentricIndex: file_centric
+
 
 song-search:
   workflowRunParameterKeys:
@@ -27,10 +38,28 @@ song-search:
 ---
 spring.config.activate.on-profile: secure
 auth:
-  jwtPublicKeyUrl: "http://localhost:8081/oauth/token/public_key"
+  jwtPublicKeyUrl: "https://ego.dev.argo.cancercollaboratory.org/api/oauth/token/public_key" #"http://localhost:8081/oauth/token/public_key"
   jwtPublicKeyStr: "-----BEGIN PUBLIC KEY-----\nSET ME IF YOU DONT HAVE A URL, BUT URL TAKES PRIORITY\n-----END PUBLIC KEY-----"
   graphqlScopes:
-      queryOnly:
-        - RDPC-DEV.READ
-      queryAndMutation:
-        - RDPC-DEV.WRITE
+    queryOnly:
+      - RDPC-DEV.READ
+      - RDPC-CA.READ
+    queryAndMutation:
+      - RDPC-DEV.WRITE
+      - RDPC-CA.WRITE
+---
+
+spring:
+  config:
+    activate:
+      on-profile: kafka
+  kafka:
+    bootstrap-servers: localhost:9092
+    template:
+      automation-trigger: song-analysis
+
+songServerId: submission-song.collab
+---
+#spring:
+#  profiles:
+#    active: secure
