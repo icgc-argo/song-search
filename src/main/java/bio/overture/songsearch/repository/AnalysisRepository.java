@@ -81,6 +81,13 @@ public class AnalysisRepository {
         .put(STUDY_ID, value -> new TermQueryBuilder("study_id", value))
         .put(RUN_ID, value -> new TermQueryBuilder("workflow.run_id", value))
         .put(
+            REPOSITORY_CODE,
+            value ->
+                new NestedQueryBuilder(
+                    "repositories",
+                    new TermQueryBuilder("repositories.code", value),
+                    ScoreMode.None))
+        .put(
             DONOR_ID,
             value ->
                 new NestedQueryBuilder(
