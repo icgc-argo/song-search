@@ -30,7 +30,7 @@
         <graphql-java-spring-boot-starter-webflux.version>2.0</graphql-java-spring-boot-starter-webflux.version>
         <graphql-java-extended-scalars.version>1.0</graphql-java-extended-scalars.version>
         <elasticsearch.version>7.6.0</elasticsearch.version>
-        <guava.version>29.0-jre</guava.version>
+        <guava.version>32.0.0-jre</guava.version>
         <lombok.version>1.18.12</lombok.version>
         <junit5.version>5.8.2</junit5.version>
         <junit-platform.version>1.6.2</junit-platform.version>
